@@ -156,6 +156,9 @@ export { default as Sidebar, SidebarProps } from './dist/commonjs/modules/Sideba
 export { default as SidebarPushable, SidebarPushableProps } from './dist/commonjs/modules/Sidebar/SidebarPushable';
 export { default as SidebarPusher, SidebarPusherProps } from './dist/commonjs/modules/Sidebar/SidebarPusher';
 
+export { default as Transition, TransitionProps, TRANSITION_STATUSES } from './dist/commonjs/modules/Transition';
+export { default as TransitionGroup, TransitionGroupProps } from './dist/commonjs/modules/Transition/TransitionGroup';
+
 // Views
 export { default as Advertisement, AdvertisementProps } from './dist/commonjs/views/Advertisement';
 
