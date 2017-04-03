@@ -1,5 +1,8 @@
+const fs = require('fs')
 const config = require('./config')
 const webpackConfig = require('./webpack.config')
+
+const { paths } = config
 
 const formatError = (msg) => {
   // filter out empty lines and node_modules
@@ -19,10 +22,16 @@ const formatError = (msg) => {
   return newLine + '\n'
 }
 
+const basePath = __dirname
+
 module.exports = (karmaConfig) => {
   karmaConfig.set({
-    basePath: process.cwd(),
+    basePath,
     browsers: ['PhantomJS'],
+    browserConsoleLogOptions: {
+      level: 'log',
+      terminal: true,
+    },
     client: {
       mocha: {
         reporter: 'html',   // change Karma's debug.html to mocha web reporter
@@ -37,19 +46,32 @@ module.exports = (karmaConfig) => {
       includeAllSources: true,
     },
     files: [
-      './test/tests.bundle.js',
+      { pattern: 'docs/app/logo.png', watched: false, included: false, served: true },
+      { pattern: 'docs/app/assets/**/*.jpg', watched: false, included: false, served: true },
+      { pattern: 'docs/app/assets/**/*.png', watched: false, included: false, served: true },
+      'test/tests.bundle.js',
     ],
     formatError,
     frameworks: ['phantomjs-shim', 'mocha'],
+    // make karma serve all files that the web server does (/* => /docs/app/*)
+    proxies: fs.readdirSync(paths.docsSrc()).reduce((acc, file) => {
+      const isDir = fs.statSync(paths.docsSrc(file)).isDirectory()
+      const trailingSlash = isDir ? '/' : ''
+
+      const original = `/${file}${trailingSlash}`
+      acc[original] = `/base/docs/app/${file}${trailingSlash}`
+      return acc
+    }, {}),
     reporters: ['mocha', 'coverage'],
+    reportSlowerThan: 100,
     singleRun: true,
     preprocessors: {
       // do not include 'coverage' preprocessor for karma-coverage
       // code is already instrumented by babel-plugin-__coverage__
-      './test/tests.bundle.js': ['webpack'],
+      'test/tests.bundle.js': ['webpack'],
     },
     webpack: {
-      entry: './test/tests.bundle.js',
+      entry: 'test/tests.bundle.js',
       devtool: config.compiler_devtool,
       module: webpackConfig.module,
       plugins: webpackConfig.plugins,
