@@ -11,6 +11,7 @@ import { exampleContext, repoURL } from 'docs/app/utils'
 import { Divider, Grid, Icon, Header, Menu, Popup } from 'src'
 import Editor from 'docs/app/Components/Editor/Editor'
 import { scrollToAnchor } from 'docs/app/utils'
+import ComponentVersion from './ComponentVersion'
 
 const babelConfig = {
   presets: ['es2015', 'react', 'stage-1'],
@@ -67,6 +68,10 @@ class ComponentExample extends Component {
     location: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
     title: PropTypes.node,
+    version: PropTypes.oneOfType([
+      PropTypes.arrayOf(PropTypes.string),
+      PropTypes.string,
+    ]),
   }
 
   componentWillMount() {
@@ -388,7 +393,7 @@ class ComponentExample extends Component {
   }
 
   render() {
-    const { children, description, title } = this.props
+    const { children, description, title, version } = this.props
     const { copiedDirectLink, exampleElement, showCode, showHTML } = this.state
     const exampleStyle = {}
 
@@ -397,41 +402,50 @@ class ComponentExample extends Component {
     }
 
     return (
-      <Grid className='docs-example' style={exampleStyle} divided={showCode} columns='1' id={this.anchorName}>
-        <Grid.Column style={headerColumnStyle}>
-          {title && <Header as='h3' className='no-anchor' style={titleStyle} content={title} />}
-          {description && <p>{description}</p>}
-          <Menu compact text icon size='small' color='green' className='docs-example-menu'>
-            <ToolTip content={copiedDirectLink ? ' Copied Link!' : 'Direct link'}>
-              <Menu.Item href={`#${this.anchorName}`} onClick={this.handleDirectLinkClick}>
-                <Icon size='large' color='grey' name='linkify' fitted />
-              </Menu.Item>
-            </ToolTip>
-            <ToolTip content='Full Screen'>
-              <Menu.Item href={`/maximize/${this.anchorName}`} target='_blank'>
-                <Icon size='large' color='grey' name='window maximize' fitted />
-              </Menu.Item>
-            </ToolTip>
-            <ToolTip content='Show HTML'>
-              <Menu.Item active={showHTML} onClick={this.handleShowHTMLClick}>
-                <Icon size='large' color={showHTML ? 'green' : 'grey'} name='html5' fitted />
-              </Menu.Item>
-            </ToolTip>
-            <ToolTip content='Edit Code'>
-              <Menu.Item active={showCode} onClick={this.handleShowCodeClick}>
-                <Icon size='large' name='code' fitted />
-              </Menu.Item>
-            </ToolTip>
-          </Menu>
-        </Grid.Column>
-        {children && (
-          <Grid.Column style={childrenStyle}>
-            {children}
+      <Grid className='docs-example' divided={showCode} id={this.anchorName} style={exampleStyle}>
+        <Grid.Row>
+          <Grid.Column style={headerColumnStyle} width={12}>
+            {title && <Header as='h3' className='no-anchor' style={titleStyle} content={title} />}
+            {description && <p>{description}</p>}
           </Grid.Column>
-        )}
-        <Grid.Column className={`rendered-example ${this.getKebabExamplePath()}`}>
-          {exampleElement}
-        </Grid.Column>
+          <Grid.Column textAlign='right' width={4}>
+            <Menu compact text icon size='small' color='green' className='docs-example-menu'>
+              <ToolTip content={copiedDirectLink ? ' Copied Link!' : 'Direct link'}>
+                <Menu.Item href={`#${this.anchorName}`} onClick={this.handleDirectLinkClick}>
+                  <Icon size='large' color='grey' name='linkify' fitted />
+                </Menu.Item>
+              </ToolTip>
+              <ToolTip content='Full Screen'>
+                <Menu.Item href={`/maximize/${this.anchorName}`} target='_blank'>
+                  <Icon size='large' color='grey' name='window maximize' fitted />
+                </Menu.Item>
+              </ToolTip>
+              <ToolTip content='Show HTML'>
+                <Menu.Item active={showHTML} onClick={this.handleShowHTMLClick}>
+                  <Icon size='large' color={showHTML ? 'green' : 'grey'} name='html5' fitted />
+                </Menu.Item>
+              </ToolTip>
+              <ToolTip content='Edit Code'>
+                <Menu.Item active={showCode} onClick={this.handleShowCodeClick}>
+                  <Icon size='large' name='code' fitted />
+                </Menu.Item>
+              </ToolTip>
+            </Menu>
+
+            {version && <ComponentVersion version={version} />}
+          </Grid.Column>
+        </Grid.Row>
+
+        <Grid.Row columns={1}>
+          {children && <Grid.Column style={childrenStyle}>{children}</Grid.Column>}
+        </Grid.Row>
+
+        <Grid.Row columns={1}>
+          <Grid.Column className={`rendered-example ${this.getKebabExamplePath()}`}>
+            {exampleElement}
+          </Grid.Column>
+        </Grid.Row>
+
         {this.renderJSX()}
         {this.renderHTML()}
       </Grid>
